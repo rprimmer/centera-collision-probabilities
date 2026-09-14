@@ -1,0 +1,27 @@
+% Editable reconstruction of Figure 1 in the June 2005 PDF.
+\begin{tikzpicture}[>=Latex, every node/.style={font=\small},
+ box/.style={draw,minimum width=4cm,minimum height=0.7cm,align=center}]
+\node (input) at (0,0.2) {original input: $x$};
+\node[box] (pad) at (0,-1) {append padding bits};
+\node[box] (length) at (0,-2) {append length block};
+\node[draw,fit=(pad)(length),inner sep=0.22cm] (pre) {};
+\node[anchor=west] at (2.5,-1.4) {preprocessing};
+\node[align=left,anchor=east] at (-2.4,-2.8) {formatted input\\$x=x_1x_2\ldots x_t$};
+\node[draw,minimum size=0.9cm] (f) at (0,-4.3) {$f$};
+\node[draw,minimum width=3cm,minimum height=2cm] (round) at (0,-4.3) {};
+\node[anchor=west,align=left] at (2.5,-4.3) {compression\\function $f$};
+\draw (-2.2,-3.25) rectangle (2.2,-5.85);
+\node[anchor=west] at (2.5,-5.5) {iterated processing};
+\node[box,minimum width=3cm] (g) at (0,-6.7) {$g$};
+\node (output) at (0,-7.9) {output: $h(x)=g(H_t)$};
+\draw[->] (input)--(pad);
+\draw[->] (pad)--(length);
+\draw[->] (length)--node[pos=.86,right] {$x_i$}(f);
+\draw[->] (f)--node[right,pos=.45] {$H_i$} (0,-5.3);
+\draw[->] (0,-5.3)--node[right,pos=.8] {$H_t$}(g);
+\draw[->] (0,-5.3)--(-1.8,-5.3)--(-1.8,-4.3)--node[above] {$H_{i-1}$}(f);
+\node[anchor=east] at (-2.3,-4.3) {$H_0=IV$};
+\draw[->] (g)--(output);
+\draw (-5.4,-0.25) rectangle (6,-7.25);
+\node[anchor=south east] at (6,-0.25) {hash function $h$};
+\end{tikzpicture}

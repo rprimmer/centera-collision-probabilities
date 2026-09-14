@@ -1,0 +1,116 @@
+\section{MDx and SHA Functions}\label{sec:3}
+
+The MDx functions are a form of ``Dedicated hash functions'' defined
+earlier in \S\ref{sec:2}. The MD4 \cite{ref21} hash
+function was introduced by Ron Rivest in 1990. While weaknesses were
+discovered with MD4
+\cite{ref15}\cite{ref30}\cite{ref32},
+MD4's significance is that it served as the starting point for the
+development of a series of similar iterated hash functions. MD4-derived
+hash functions include the 256-bit extension of MD4
+\cite{ref23} and the Secure Hash Algorithm (SHA) designed by
+NIST/NSA, later substituted by the slightly revised SHA-1
+\cite{ref10}. Additionally MD4 is optimized to be highly
+efficient on 32-bit word computers and is thus able to produce 128-bit
+hash results far quicker than alternative methods, e.g.~via modified
+block ciphers.
+
+To counter the weaknesses discovered with MD4 Rivest introduced MD5
+\cite{ref22} in 1991 to strengthen the hash function
+accordingly. MD5 differs from MD4 on the following points
+\cite{ref3}.
+
+\begin{itemize}
+\tightlist
+\item
+  A fourth round was added.
+\item
+  The second round function has been changed from the majority function
+  \((X\land Y)\lor(X\land Z)\lor(Y\land Z)\) to the multiplexer function
+  \((X\land Z)\lor(Y\land\neg Z).\)
+\item
+  The order in which input words are accessed in rounds 2 and 3 was
+  changed.
+\item
+  The shift amounts in each round have been changed. None are the same
+  now.
+\item
+  Each step now has a unique additive constant.
+\item
+  Each step now adds in the result of the previous step.
+\end{itemize}
+
+Where \(\land\) denotes bit-wise AND, \(\lor\) denotes bit-wise OR,
+\(\oplus\) denotes bit-wise XOR, and \(\neg Z\) denotes the bit-wise
+complement of \emph{Z}.
+
+\subsection{MD5 Detail}\label{sec:3.1}\label{md5-detail}
+
+MD5 is perhaps the most extensively covered dedicated hash function in
+the literature, likely due to its popularity. Rivest details the
+algorithm and provides sample C source in \cite{ref22}.
+Schneier provides a survey of several of the more frequently used hash
+functions in \cite{ref7}. For our purposes a subset of that
+information is sufficient.
+
+The MD5 algorithm follows the iterative structure described in
+\S\ref{sec:2.2}, where the hash is computed by repeated
+application of a compression (or \emph{round}) function to successive
+blocks of the message. The message to be hashed is first padded to a
+multiple of 512 bits and then divided into a sequence of 512-bit message
+blocks. The compression function takes two inputs, a 128-bit chaining
+value and a 512-bit message block, and produces as output a new 128-bit
+chaining variable, which is input to the next iteration of the
+compression function \cite{ref4}. In every step one of the
+chaining variables is updated. A typical step operation of the round
+function is
+
+\(A=B+((A+\Phi(B,C,D)+X+K)\ll s),\)
+
+where \emph{X} is the 512-bit input block (split into \emph{i} 32-bit
+words), \emph{+} denotes addition modulo \(2^{32}\) , \(\Phi\) is the
+round-dependent Boolean function (e.g.~XOR), \emph{K} is the
+step-dependent constant, and \textless\textless{} \emph{s} denotes a
+left circular shift by \emph{s} positions \cite{ref12}.
+
+Rivest defined four 32-bit variables (referred to as chaining variables)
+that are initialized to the following values:
+
+\begin{equation}\label{eq:3.1}
+\begin{aligned}A&=\mathtt{0x01234567}\\B&=\mathtt{0x89abcdef}\\C&=\mathtt{0xfedcba98}\\D&=\mathtt{0x76543210}\end{aligned}
+\end{equation}
+
+There are four nonlinear functions, one used in each operation (a
+different one for each round).
+
+\begin{equation}\label{eq:3.2}
+\begin{aligned}\Phi_1(X,Y,Z)&=(X\land Y)\lor(\neg X\land Z)\\\Phi_2(X,Y,Z)&=(X\land Z)\lor(Y\land\neg Z)\\\Phi_3(X,Y,Z)&=X\oplus Y\oplus Z\\\Phi_4(X,Y,Z)&=Y\oplus(X\lor\neg Z)\end{aligned}
+\end{equation}
+
+These functions are designed so that if the corresponding bits of
+\emph{X, Y,} and \emph{Z} are independent and unbiased, then each bit of
+the result will also be independent and unbiased. The function
+\(\Phi_1\) is the bit-wise conditional: If \emph{X} then \emph{Y} else
+\emph{Z}. The function \(\Phi_2\) is the bit-wise conditional: If
+\emph{Z} then \emph{X} else \emph{Y}. The function \(\Phi_3\) is the
+bit-wise parity operator \cite{ref7}. After the last message
+block has been processed, the final chaining value is output as the hash
+of the message.
+
+\subsection{SHA Functions}\label{sec:3.2}\label{sha-functions}
+
+The Secure Hash Algorithm (SHA) \cite{ref10} is a digest
+algorithm proposed by the US NIST (National Institute of Standards and
+Technology) agency as a standard digest algorithm in August 2002. NIST
+released a first version of this algorithm --- referred to as "SHA" back
+in 1992. It subsequently discovered a weakness with SHA and released a
+second version which it referred to as "SHA-1''.
+
+Where SHA-1 has a 160 bit hash value, NIST also defined hash functions
+with larger hash output such as SHA-224 (224 bits), SHA-256 (256 bits),
+SHA-384 (384 bits) and SHA-512 (512 bits). The cryptographic community
+generally considers SHA-256, SHA-384 and SHA-512 to be stronger than
+MD5.
+
+Detail on the internals of the SHA family can be found in
+\cite{ref10}.

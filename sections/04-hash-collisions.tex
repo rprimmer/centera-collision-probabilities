@@ -1,0 +1,53 @@
+\section{Hash Collisions}\label{sec:4}
+
+MD5 satisfies the necessary conditions to be classified as a OWHF. As
+such it is widely used in security protocols such as TLS and IPsec.
+Perhaps due to its speed of computation, MD5 is among the most
+frequently used hash functions in use today. However, researchers have
+forged collisions in a subset of the round functions in MD5
+\cite{ref3}\cite{ref12}. Moreover, at \emph{Crypto
+2004} a paper was presented \cite{ref30} that demonstrated
+artificially constructed MD5 hash collisions between two 1024-bit
+streams having a 6 bit difference. More details on the methodology are
+available in \cite{ref31}.
+
+Researchers have also found a methodology \cite{ref33} to
+induce collisions in a reduced-round version of SHA-1. However, since it
+still requires a supercomputer to calculate a collision for SHA-1, no
+practical collisions are known presently.
+
+SHA-256, SHA-384 or SHA-512 are considered very secure and no attacks
+are known presently.
+
+\subsection{Practical Effects of Induced
+Collisions}\label{sec:4.1}\label{practical-effects-of-induced-collisions}
+
+It is important to contrast the results of theoretical work, where
+collisions can be constructed based on specially crafted inputs that
+differ in a small number of bits, versus the use of a hash function in
+practice on real data.
+
+For practical use in a content addressed system such as Centera, the
+more important concern in the ordinary course of usage is how likely it
+will be that two distinct messages (files in this case), will actually
+resolve to the same hash value. This is different from the results for
+specially crafted inputs that are intended to have the same hash value.
+As the next section describes, the probability of naturally occurring
+collisions is exceedingly small.
+
+\subsection{Non-induced Collisions}\label{sec:4.2}\label{non-induced-collisions}
+
+As stated in \S\ref{sec:2.1} Definition 2, for a hash function to
+be strong collision resistant it must be one-way (i.e.~both preimage and
+second-preimage resistant) and it must be hard to find two distinct
+messages that hash to the same result. As used in Centera, in the worst
+case a preimage or second-preimage for a given file would not be found
+on average until \(\approx2^{127}\) (170 billion billion billion
+billion) unique files were stored on a single logical cluster (refer to
+Theorem 1). Producing a hash collision between any two distinct files
+using just MD5 would not be found on average until \(\approx2^{64}\) (18
+billion billion) unique files were stored on a single logical cluster
+(refer to formula \eqref{eq:5.2}).
+
+The next sections apply the properties of hash collisions to the three
+naming schemes used by Centera.

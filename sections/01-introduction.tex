@@ -1,0 +1,37 @@
+\section{Introduction}\label{sec:1}
+
+EMC introduced Centera in April 2002, ushering in a new model of data
+storage referred to as Content Addressed Storage, or CAS
+\cite{ref8}. The two principal ideas Centera introduced were
+a node-based structure referred to as RAIN, for redundant array of
+independent nodes, and an object store.
+
+Centera presents a flat object store to the application. Applications
+submit data and are returned a global handle that uniquely refers to the
+data stored. The handle returned is a function of the data submitted.
+Upon submission, a 256-bit handle --- called the Content Address, or CA
+--- is calculated and returned to the application
+\cite{ref20}. Nodes are divided into two groups: \emph{Access
+Nodes}, which act principally as gateways between the cluster and the
+client application server; and \emph{Storage Nodes}, which act
+principally as semi-autonomous storage containers. Data objects are
+referred to as \emph{blobs}, and the associated metadata containers are
+referred to as \emph{clips}.
+
+The CA serves the twin role of unique data handle and MDC (Manipulation
+Detection Code). It is the hashing function that allows for the latter
+role. Since the CA is calculated based upon a bit representation of the
+content itself, any modification of the content results in a different
+CA. Centera takes advantage of this property for achieving cache
+coherence and detecting when a file on disk has been damaged or in some
+way altered. Detail of this mechanism and the RAIN structure can be
+found in the Centera Product Description Guide \cite{ref9}.
+
+In this paper we provide a general description of hash functions and
+their properties. We then focus on the MDx and SHA-x family of hash
+functions as the MD5 and SHA-256 schemes are currently employed by
+Centera for a portion of the CA calculation. We then describe the most
+common forms of attack on hash functions and relate those specifically
+to the Centera addressing schemes. Finally we present a proof of the
+collision and preimage resistance of the full CA used by Centera as the
+handle to stored clips and blobs.
