@@ -3,6 +3,14 @@
 LaTeX conversion of **Collision and Preimage Resistance of the Centera Content
 Address**, by Robert Primmer and Carl D'Halluin, June 2005.
 
+## Read the paper
+
+[**Read or download the final PDF**](centera-collisions.pdf). No build tools are required.
+
+The top-level PDF is tracked in Git. Running `make` refreshes it from the
+compiled copy in `build/`; commit both source changes and the refreshed PDF.
+Cleanup commands retain the top-level PDF.
+
 ## Build
 
 Requires pdfLaTeX and latexmk (for example, MacTeX or TeX Live), with the
@@ -15,9 +23,9 @@ make overleaf
 
 | Command | Result |
 | --- | --- |
-| `make` | Build `build/centera-collisions.pdf` |
+| `make` | Build and refresh `centera-collisions.pdf` |
 | `make clean` | Remove intermediates; retain PDF |
-| `make distclean` | Remove intermediates and generated PDF |
+| `make distclean` | Remove build outputs; retain top-level PDF |
 | `make overleaf` | Create `dist/centera-collisions-overleaf.zip` |
 
 The Overleaf ZIP contains only editable sources and its own output-directory
