@@ -65,20 +65,26 @@ compression function \cite{ref4}. In every step one of the
 chaining variables is updated. A typical step operation of the round
 function is
 
-\(A=B+((A+\Phi(B,C,D)+X+K)\ll s),\)
+\[
+A\leftarrow B+\operatorname{ROTL}_{32}
+       \bigl(A+\Phi(B,C,D)+X[j]+K,s\bigr).
+\]
+Each 512-bit block comprises 16 words $X[0],\ldots,X[15]$ of 32 bits;
+$j$ selects a word for the current step. All additions are modulo $2^{32}$,
+and $\operatorname{ROTL}_{32}(u,s)$ rotates a 32-bit word left by $s$ bits.
+The Boolean function $\Phi$ and constant $K$ depend on the round and step.
 
-where \emph{X} is the 512-bit input block (split into \emph{i} 32-bit
-words), \emph{+} denotes addition modulo \(2^{32}\) , \(\Phi\) is the
-round-dependent Boolean function (e.g.~XOR), \emph{K} is the
-step-dependent constant, and \textless\textless{} \emph{s} denotes a
-left circular shift by \emph{s} positions \cite{ref12}.
-
-Rivest defined four 32-bit variables (referred to as chaining variables)
-that are initialized to the following values:
-
+The initial register values, written as ordinary hexadecimal \emph{32-bit
+integers}, are \cite{ref22}
 \begin{equation}\label{eq:3.1}
-\begin{aligned}A&=\mathtt{0x01234567}\\B&=\mathtt{0x89abcdef}\\C&=\mathtt{0xfedcba98}\\D&=\mathtt{0x76543210}\end{aligned}
+\begin{aligned}
+A&=\mathtt{0x67452301},&B&=\mathtt{0xefcdab89},\\
+C&=\mathtt{0x98badcfe},&D&=\mathtt{0x10325476}.
+\end{aligned}
 \end{equation}
+RFC 1321 also lists their bytes in little-endian order, for example
+\texttt{01 23 45 67} for $A$. The original paper printed that byte sequence
+as if it were an integer; the distinction is now explicit.
 
 There are four nonlinear functions, one used in each operation (a
 different one for each round).

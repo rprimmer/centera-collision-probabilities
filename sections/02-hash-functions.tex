@@ -71,9 +71,8 @@ function \emph{h} satisfying the following conditions:
 \emph{Definition 2}: A \textbf{collision resistant hash function} (CRHF)
 is a one-way hash function with the additional property that the hash
 function must be collision resistant: this means that it is ``hard'' to
-find two distinct messages that hash to the same result. That is, given
-any two distinct inputs \(X,X'\) it is computationally infeasible to
-hash to the same output such that \(h(X')=h(X).\)
+find two distinct messages that hash to the same result. The adversary must find a pair of distinct inputs $X,X'$ satisfying
+$h(X)=h(X')$; both inputs are chosen by the adversary.
 
 Note that ``preimage resistant'' is alternatively referred to as
 \emph{one-way}; ``(second) preimage resistant'' is referred to as
@@ -180,53 +179,48 @@ hash function less secure and may lead to trivial collisions or second
 preimages. Note that the function \emph{f}, the \emph{IV}, and the
 padding scheme are publicly known.
 
-Research on hash functions has been focused on the question: which
-properties should be imposed on \emph{f} to guarantee that \emph{h}
-satisfies certain properties? Two partial answers have been found to
-this question. We state them here for the case that \emph{g} is the
-identity function. The first result is by Lai and Massey
-\cite{ref29} and gives necessary and sufficient conditions for
-\emph{f} in order to obtain an ``ideally secure'' hash function
-\emph{h}.
+Research on iterated hash functions examines which properties of the
+compression function are inherited by the complete hash. Collision
+resistance and second-preimage resistance require separate reasoning.
+The discussion below distinguishes length-dependent second-preimage
+attacks from the collision-preservation theorem for a length-strengthened
+construction. For the latter result the output transformation $g$ is the
+identity function; a non-injective truncation must be analyzed separately.
 
-\textbf{Theorem 1 (Lai-Massey)} \emph{Assume that the padding contains
-the length of the input string, and that the message X (without padding)
-contains at least 2 blocks. Then finding a second-preimage for h with a
-fixed IV requires 2}\textsuperscript{\emph{n~}} \emph{operations if and
-only if finding a second-preimage for f with arbitrarily chosen
-H}\textsubscript{\emph{i-1}} \emph{requires
-2}\textsuperscript{\emph{n~}}\emph{operations.}
+\textbf{Compression-function security.} The relationship between a
+compression function and the iterated hash depends on the attack model,
+message length, padding, and allowed choice of chaining values. The historical
+Lai--Massey discussion \cite{ref29} is not used here to claim a universal
+$2^n$ second-preimage lower bound. In particular, long-message attacks
+\cite{ref11} must also be considered.
 
-The fact that the condition is necessary is based on the following
-argument: if one can find a second-preimage for \emph{f} in
-\emph{2}\textsuperscript{\emph{S}} operations (with \emph{s \textless{}
-n}), one can find a second-preimage for \emph{h} in \(2^{1+(n+s)/2}\)
-operations with a meet-in-the-middle attack \cite{ref5}.
-
-A second result by Damgård \cite{ref15} and independently by
-Merkle \cite{ref24} states that for \emph{h} to be a CRHF it
-is sufficient that \emph{f} is a collision resistant function.
-
-\textbf{Theorem 2 (Damgård-Merkle)} \emph{Let f be a collision resistant
-function mapping l to n bits (with l -- n \textgreater{} 1). If an
-unambiguous padding rule is used, the following construction yields a
-CRHF:}
-
+\textbf{Theorem (Merkle--Damg\aa rd, length-strengthened form).}
+Let $f:\{0,1\}^n\times\{0,1\}^b\to\{0,1\}^n$ be collision resistant.
+Encode each supported message injectively into blocks $X_1,\ldots,X_t$,
+including padding and its length, so that no valid encoding is a proper
+suffix of another. With a fixed initial value, define
 \begin{equation}\label{eq:2.2}
-\begin{aligned}H_1&=f(0^{n+1}\mathbin\Vert X_1)\\H_i&=f(H_{i-1}\mathbin\Vert1\mathbin\Vert X_i)\quad i=2,3,\ldots,t\\h(X)&=H_{t+1}\end{aligned}
+\begin{aligned}
+H_0&=IV,\\
+H_i&=f(H_{i-1},X_i),\qquad i=1,\ldots,t,\\
+h(X)&=H_t.
+\end{aligned}
 \end{equation}
+Here $t$ counts \emph{all} encoded blocks, including the length encoding.
+The order of the two arguments of $f$ is state, then block in this formula;
+\eqref{eq:2.1} uses block, then state. This consistent endpoint replaces the
+original recurrence's undefined $H_{t+1}$.
 
-Where \textbar\textbar{} denotes concatenation of bit strings and
-\(0^{n+1}\) indicates a sequence of \emph{n+1} bits, all being zero.
-
-The proof that the resulting function \emph{h} is collision resistant
-follows by a simple argument that a collision for \emph{h} would imply a
-collision for \emph{f} for some stage \emph{i}. The inclusion of the
-length-block, which effectively encodes all messages such that no
-encoded input is the tail end of any other encoded input, is necessary
-for this reasoning \cite{ref2}.
+To see why the construction preserves collision resistance, trace two equal
+final states backwards. Unequal compression inputs giving an equal output
+constitute a collision in $f$. Otherwise the last blocks and preceding states
+must coincide, and this reasoning repeats. Equal-length encodings would then
+be identical; unequal-length encodings would violate the suffix condition.
+Thus distinct messages with equal hashes yield a compression-function
+collision. Length fields must be unambiguous over the supported message
+lengths; merely adding arbitrary padding is insufficient \cite{ref2,ref15,ref24}.
 
 Recent findings \cite{ref11} show that for a typical
 \emph{n}-bit iterated hash function, one can find a second preimage for
 a \(2^k\) -block message in about \(k\cdot2^{n/2+1}+2^{n-k+1}\)
-operations for long messages, assuming unlimited memory.
+operations for long messages, assuming abundant memory. This is an attack-work estimate, not a lower bound on every possible attack.

@@ -1,6 +1,6 @@
 LATEXMK ?= latexmk
 
-.PHONY: all pdf clean clean-all distclean overleaf help
+.PHONY: all pdf clean clean-all distclean overleaf check help
 
 all: pdf
 
@@ -16,6 +16,9 @@ clean-all: distclean
 
 distclean:
 	$(LATEXMK) -C centera-collisions.tex
+
+check:
+	python3 scripts/check-math.py
 
 overleaf:
 	python3 scripts/package-overleaf.py

@@ -2,14 +2,12 @@
 \centering\small
 \begin{tabularx}{\linewidth}{@{}l*{3}{>{\raggedright\arraybackslash}X}@{}}
 \toprule
-& Number of files beyond which collisions become likely & Work required to forge file collision & Work required to forge 2nd preimage of a given file $X$\\
+& Approximate 50\% accidental-collision point & Adversarial collision & Given-file second preimage\\
 \midrule
-M & $2^{64}$ files stored & $O(1)$\textsuperscript{3} & $O(2^{108})$\\
-GM & Not possible & Not possible & Not possible\\
-M++ & $2^{124}$ files stored & $O(2^{67})$ & $2^{119}$\\
+M & $1.17741\cdot2^{64}$ files & MD5 collision attacks apply & Length-dependent; historical $2^{108}$ reference scale only\\
+GM & Depends on bin occupancy and runtime & Depends on write-path control and G generation & Depends on target-field access and write checks\\
+M++ & $1.17741\cdot2^{124}$ files & Conditional multicollision estimate; see \S\ref{sec:5.5} & Concrete cost not established here\\
 \bottomrule
 \end{tabularx}
-\par\smallskip
-{\footnotesize \textsuperscript{3}For simplicity assume MD5 collisions are available from \cite{ref30}.\par}
-\caption{Summary of naming schemes}\label{tab:2}
+\caption{Naming schemes: model-dependent probabilities and attack qualifications}\label{tab:2}
 \end{table}

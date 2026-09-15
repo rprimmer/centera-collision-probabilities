@@ -16,14 +16,11 @@ have differing collision probabilities and preimage resistance.
 
 \subsection{Birthday Paradox}\label{sec:5.1}\label{birthday-paradox}
 
-Question: Ignoring leap years, how many people need to be present in a
-room for there to be \(\approx50\%\) chance that someone in the room
-shares (i.e. collides with) your birthday? Answer: 253 (as shown in
-\eqref{eq:5.1} below)\footnote{This maps to a preimage or
-  second-preimage hash collision.}.
-
+For uniformly and independently distributed birthdays, 253 \emph{other}
+people give approximately a 50\% chance of matching a specified person's
+birthday (254 people total if that person is in the room):
 \begin{equation}\label{eq:5.1}
-1-\left(\frac{364}{365}\right)^{253}\approx0.50
+1-\left(\frac{364}{365}\right)^{253}\approx0.50.
 \end{equation}
 
 However, if you change the question to include one key difference, the
@@ -42,7 +39,7 @@ this result would not stand if the room was full of twins.
 
 We now add some rigor and generalization to the birthday paradox.
 
-\textbf{Theorem 3:} Let \(P_{\mathrm{collision}}(N,q)\) denote the
+\textbf{Theorem (birthday upper bound):} Let \(P_{\mathrm{collision}}(N,q)\) denote the
 probability to have at least one collision when we throw \emph{q
 \textgreater{}} 1 balls at random into \emph{N \textgreater{} q}
 buckets, giving us equation \eqref{eq:5.2} below.
@@ -51,10 +48,10 @@ buckets, giving us equation \eqref{eq:5.2} below.
 P_{\mathrm{collision}}(N,q)\le0.5\frac{q(q-1)}{N}
 \end{equation}
 
-In this paper we only present an upper bound to
-\(P_{\mathrm{collision}}(N,q)\) since that is relevant for our collision
-probability calculations. For a more exhaustive proof, including a lower
-bound, readers are referred to \cite{ref26}.
+The union bound below is useful for rare collisions. The exact probability
+and its exponential approximation are given after the proof, so that a
+bound is not mistaken for an equality. Additional birthday bounds and
+analysis are discussed in \cite{ref26}.
 
 \textbf{Proof:} Let \(C_i\) be the event that the \(i\) -th ball is
 thrown in a non-empty bucket, i.e.~it collides with one of the previous
@@ -67,70 +64,61 @@ have,
 \begin{aligned}P_{\mathrm{collision}}(N,q)&=P[C_1\lor C_2\lor\cdots\lor C_q]\\&\le P[C_1]+P[C_2]+\cdots+P[C_q]\\&\le\frac0N+\frac1N+\frac2N+\cdots+\frac{q-1}{N}\\&\le\frac{q(q-1)}{2N}.\end{aligned}
 \end{equation}
 
-From equation \eqref{eq:5.3} we see the quadratic relation
-between \emph{q} and \(P_{\mathrm{collision}}(N,q).\) This is the core
-of the birthday paradox. You only need to throw about \(\sqrt{N}\) balls
-into \emph{N} buckets to achieve a reasonable probability of ending up
-with two (or more) balls in the same bucket.
+The bound in \eqref{eq:5.2} is useful when collisions are rare, but it is
+not the probability itself. For $0\le q\le N$ independent uniform samples,
+\[
+P_{\mathrm{collision}}(N,q)
+ =1-\prod_{i=0}^{q-1}\left(1-\frac{i}{N}\right)
+ \approx1-\exp\left(-\frac{q(q-1)}{2N}\right).
+\]
+The exponential approximation applies near the birthday scale for large
+$N$; the linear approximation $q(q-1)/(2N)$ requires that this ratio be small.
+At $q\approx\sqrt N$, the probability is approximately $1-e^{-1/2}=39.35\%$.
+The 50\% threshold is approximately $\sqrt{2N\ln2}=1.17741\sqrt N$.
+These statements assume independence and uniformity, not merely an even
+histogram of outputs.
 
 \subsection{Centera with the M naming
 scheme}\label{sec:5.2}\label{centera-with-the-m-naming-scheme}
 
-If a large number of messages are hashed using a given hash function,
-collisions will occur ``by chance'' after a very large number of
-messages have been hashed. Extensive statistical tests have been
-performed in the past on MD5 (for example in the RIPE project
-\cite{ref19}), and no deviations from random behavior have
-been detected. This implies that modeling MD5 in this respect as a
-random function will result in a very good approximation of the
-collision probability.
-
-MD5 hashes data into 128-bit strings. Relating to the proof in
-\eqref{eq:5.3} we can state that \(N=2^{128}.\) Therefore, once
-a threshold of \(q=2^{64}\) files is reached, collisions will be found
-very quickly. More precisely, if \(q=\alpha\cdot2^{64}\) files are
-hashed, then we can derive from formula \eqref{eq:5.2} that the
-probability that one or more collisions occur is upper bounded by
-\eqref{eq:5.4}.
-
+For distinct, non-adversarial contents, assume MD5 outputs behave as
+independent uniform 128-bit values. Statistical tests motivate this model
+but do not prove it, and it does not apply to chosen collision attacks.
+Set $N=2^{128}$. At $q=2^{64}$ the collision probability is approximately
+39.35\%; the 50\% threshold is approximately $1.17741\cdot2^{64}$.
+For $q=\alpha2^{64}$, the union bound becomes
 \begin{equation}\label{eq:5.4}
-\frac{\alpha\cdot2^{64}\cdot(\alpha\cdot2^{64}-1)}{2\cdot2^{128}}\approx\frac{\alpha^2}{2}
+P_{\mathrm{collision}}(2^{128},q)
+ \le\min\left\{1,\frac{\alpha2^{64}(\alpha2^{64}-1)}{2\cdot2^{128}}\right\}.
 \end{equation}
+When $q\gg1$ and $\alpha\ll1$, the bound and the probability are both
+approximately $\alpha^2/2$.
 
-Note that Centera typically operates with very small values of
-\(\alpha\) (e.g., .000000001) since the total file count in the system
-is substantially less than \(2^{64}\) files (18 billion billion files).
-
-Table~\ref{tab:1} indicates the probability of a CA collision when
-using the \textbf{M} naming scheme for various fill rates.
-
+Table~\ref{tab:1} reports the rare-collision approximation to three
+significant figures. Capacities are decimal \emph{logical payload} totals,
+not physical protected-storage requirements: 1 kB is 1,000 bytes.
 \input{fig/collision-table}
 
-Such numbers are sufficiently large that it's difficult to get a sense
-of magnitude. Using time as the dimension, assume a hypothetical CAS
-application capable of storing 10,000 files per second to a Centera
-cluster. Using an average file size of 1K, writing \(10^{15}\) such
-files would take up an exabyte of protected storage. However, it would
-take several millennia to fill up the cluster at this rate. As a point
-of comparison, after 1,000 years of continuous operation the probability
-of a CA collision using the M naming scheme is less than 1 in
-1,000,000,000.
+At 10,000 files per second for 1,000 years of 365 days each,
+$q=3.1536\cdot10^{14}$ and the modeled probability is approximately
+$1.46\cdot10^{-10}$. A total of $10^{15}$ files of 1 kB represents 1 EB
+of logical payload and takes about 3,171 years at that rate. Protection
+and metadata overhead require additional physical capacity.
 
-In the case of a malicious user seeking to forge two arbitrary files
-which return an identical \textbf{M} content address (this is referred
-to as ``collision resistance''), then the user must attempt to apply the
-work described in \cite{ref30}\cite{ref31} to
-Centera.
+For adversarial collisions, MD5's cryptanalytic weaknesses replace this
+random-input model \cite{ref30,ref31}. Reusing a known collision pair is
+not the same task as constructing one for application-constrained content.
 
-In the case of a malicious user seeking to forge a file \(X'\) which
-gets an identical \textbf{M} content address as a given file X (this is
-referred to as ``preimage resistance''), one can attempt to apply the
-ideas described in \cite{ref11}. Knowing that the maximal file
-size in Centera is 100Mb, we have less than \(2^{21}\) 512-bit blocks in
-one file. We can conclude that on average about \(2^{128-21+1}=2^{108}\)
-MD5 evaluations are required to forge a preimage of a given file X.
-Although this effort can happen offline, the number is sufficiently
-large to make such attacks impractical.
+For a \emph{given} file, finding a distinct file with the same M address
+is a second-preimage problem. Reference~\cite{ref11} gives a generic
+long-message attack with estimated work
+$k2^{65}+2^{129-k}$ MD5 compression calls for a target near $2^k$ blocks.
+The historical ``100Mb'' limit is ambiguous and is not independently
+verified. Interpreting it as 100 MB ($10^8$ bytes) or 100 MiB
+($100\cdot2^{20}$ bytes) gives fewer than $2^{21}$ padded 512-bit blocks;
+100 megabits is smaller still. Substituting $k=21$ gives roughly
+$2^{108}$ calls as a long-message reference scale, not a proved minimum
+for all files or attacks. Shorter targets have different work estimates.
 
 \subsection{Random Generators}\label{sec:5.3}\label{random-generators}
 
@@ -180,186 +168,126 @@ The Centera GM CA contains the following components:
   \textbf{H:} 13 bits used as ``header'' codes.
 \end{itemize}
 
-\subsubsection{Timestamp and counter}\label{sec:5.4.1}\label{timestamp-and-counter}
+\subsubsection{Timestamp and counter}\label{sec:5.4.1}
 
-The timestamp \textbf{T} significantly reduces the probability of
-collisions by effectively partitioning the entire Centera system into
-sets of files that have been written within about one second of each
-other. Incoming files are time stamped by the access node through which
-the file enters the cluster the first time. The timestamp \textbf{T}
-overflows after a little more than 1,000 years.
+Use $\Delta=1{,}024$ milliseconds per timestamp tick and $C_0=2^{10}=1{,}024$
+counter values. A 35-bit timestamp wraps after $2^{35}\Delta$ milliseconds,
+about 1,116 years of 365 days. The following bound assumes coherent,
+monotone timestamp bins with no wrap, rollback, or reuse during the interval;
+otherwise objects with repeated timestamp values must be grouped together.
 
-Suppose that the peak write speed to a Centera is \emph{S} files per
-second per access node. Given \emph{A} access nodes in a Centera, we
-conclude that the upper bound for the number of files having identical
-timestamp \textbf{T} is equal to \(A\cdot S.\)
-
-Every access node in Centera maintains a 10-bit counter \textbf{C} which
-is increased for every new file stored on the system. The value of this
-counter \textbf{C} is randomized across the access nodes and repeats
-after each 1,024 files stored through the access node. An upper bound
-for the number of files having both identical timestamp \textbf{T} and
-identical counter \textbf{C} is \eqref{eq:5.5}.
-
+Let $A$ be the number of access nodes and $m$ an integer upper bound on
+writes assigned to any one timestamp by any one node. If $S$ is expressed
+in files per second, using $m=\lceil1.024S\rceil$ requires a bound on writes
+\emph{within each tick}; a long-term average rate alone is insufficient.
+Each node's counter advances by one per write and does not reset within
+a tick. A given counter value can then occur at most $\lceil m/C_0\rceil$
+times per node. Consequently, for any fixed $(T,C)$ bin,
 \begin{equation}\label{eq:5.5}
-A+\left\lfloor\frac{A\cdot S}{2^{10}}\right\rfloor\approx A+\frac{A\cdot S}{2^{10}}
+n_{T,C}\le B,\qquad B=A\left\lceil\frac{m}{C_0}\right\rceil.
 \end{equation}
+This bound keeps the integer quantization and holds without requiring
+$S>A$. It does not depend on the nodes having independent counter offsets.
 
-This formula holds for \emph{S} larger than \emph{A}, which is always
-the case. For very large values of \emph{S}, the addition of \emph{A}
-can be omitted as having minor impact on the result. Note that the
-\emph{A} term is due to a quantization effect because it is not possible
-to split documents into pieces for access node processing (e.g., when
-1025 documents are assigned C values from the 1024 possibilities, at
-least one value will be assigned to at least 2 documents).
+\subsubsection{Applying the Birthday Paradox}\label{sec:5.4.2}
 
-\subsubsection{Applying the Birthday
-Paradox}\label{sec:5.4.2}\label{applying-the-birthday-paradox}
-
-In order for a collision to occur using the GM naming scheme, all
-components \textbf{M.G.T.C.H} of the blob address must be identical for
-two distinct files.
-
-In \S\ref{sec:5.4.1} we showed that the impact of the timestamp
-\textbf{T} and counter \textbf{C} effectively limits the size of the set
-in which we can have collisions, to approximately \(A\cdot S/2^{10}\)
-files (assuming that \emph{S} is much larger than \emph{A}).
-
-The component \textbf{H} is non-random, hence it does not help to reduce
-the probability of collisions.
-
-The components \textbf{M} and \textbf{G} are fully random and add up to
-128+70=198 bits (see \S\ref{sec:5.2} for the randomness of
-\textbf{M} and \S\ref{sec:5.4} for the randomness of \textbf{G}).
-
-Applying the birthday paradox to a set of \(A\cdot S/2^{10}\) balls
-thrown into \(2^{198}\) buckets, we end up with the probability of a
-collision with the GM naming scheme indicated in \eqref{eq:5.6}.
-
+Two distinct contents can share a full GM address only if M, G, T, C, and H
+all match. Ignoring H gives a conservative bound. For the accidental-content
+model, assume that each candidate pair in a $(T,C)$ bin has probability
+$2^{-198}$ of matching both its 128-bit M and 70-bit G components. This
+requires independent uniform M outputs and fresh uniform G values independent
+of the content, node, counter, and timestamp. A CSPRBG definition alone does
+not prove these properties of an implementation. A union bound gives
 \begin{equation}\label{eq:5.6}
-\frac{(A\cdot S)^2}{2^{20}\cdot2\cdot2^{198}}=\frac{(A\cdot S)^2}{2^{219}}
+P_{T,C}\le\frac{\binom{n_{T,C}}2}{2^{198}}
+          \le\frac{B(B-1)}{2^{199}}.
 \end{equation}
-
-The number of possible combinations (\textbf{T}, \textbf{C}) over a
-large time interval is equal to the number of milliseconds in that time
-interval.
-
-If we run a Centera system for a period of \emph{Z} milliseconds, then
-for large values of Z, the probability of experiencing a collision
-during these \emph{Z} milliseconds is indicated in
-\eqref{eq:5.7}.
-
+No independence between collision events is needed for this union bound.
+For $Z$ elapsed milliseconds, at most
+$L=\lceil Z/\Delta\rceil+1$ timestamp bins intersect the interval, allowing
+for partial ticks at both ends. There are at most $LC_0$ candidate bins:
 \begin{equation}\label{eq:5.7}
-\left(\frac{(A\cdot S)^2}{2^{219}}\right)Z
+P_{\mathrm{GM}}\le
+ \min\left\{1,\frac{LC_0B(B-1)}{2^{199}}\right\}.
 \end{equation}
+For repeated identical content, or adversarially arranged MD5 collisions,
+M contributes no independent collision protection. With fresh independent
+uniform G values, replace $2^{198}$ in the pair model by $2^{70}$;
+\eqref{eq:5.7} then has denominator $2^{71}$. The stronger 198-bit model
+must not be applied to those cases.
 
-\subsubsection{Collision Probability with
-GM}\label{sec:5.4.3}\label{collision-probability-with-gm}
+\subsubsection{Collision Probability with GM}\label{sec:5.4.3}
 
-In a typical Centera setting, an upper bound for \emph{A} is 100
-different access nodes, and an upper bound for \emph{S} is 10,000 small
-files per second per access node. Running this experiment for 1,000
-years, we get \(Z=3.15\cdot10^{13}\) milliseconds\emph{.} Feeding this
-into equation \eqref{eq:5.7} we end up with the probability
-described in the equation \eqref{eq:5.8} below.
-
+For the historical illustrative workload $A=100$, $m=10{,}240$ writes per
+tick per node (10,000 files/second under the per-tick assumption), and
+1,000 years of 365 days, $Z=31{,}536{,}000{,}000{,}000$ milliseconds.
+Thus $B=1{,}000$ and $L=30{,}796{,}875{,}001$, giving
 \begin{equation}\label{eq:5.8}
-\left(\frac{(100\times10{,}000)^2}{2^{219}}\right)Z\approx4\cdot10^{-41}
+P_{\mathrm{GM}}\le
+\frac{30{,}796{,}875{,}001\cdot1{,}024\cdot1{,}000\cdot999}{2^{199}}
+\approx3.92\cdot10^{-41}.
 \end{equation}
+This is a conditional upper bound, not impossibility and not an empirical
+measurement of Centera. It must not be compared directly with a per-bit disk
+error rate without specifying how many bits are read and over what interval.
+A content checksum can help detect corruption; a successful match is not an
+absolute guarantee of integrity.
 
-In short, the probability of a collision in the GM naming scheme is
-\(\sim4\cdot10^{-41}\) assuming an ingestion rate of 1,000,000
-files/second over a period of 1,000 years. Note that this is an
-extraordinarily high ingestion rate over a long period of time. In the
-practical usage of Centera, the collision probability will be several
-orders of magnitude smaller.
+For an attacker, fresh independent server-chosen G values give at most
+$\binom u2/2^{70}$ collision probability among $u$ compatible writes in one
+$(T,C,H)$ group whose M values have already been made equal. Matching a
+\emph{fixed} target G in $u$ independent compatible trials has probability
+$1-(1-2^{-70})^u$. These are trial-count statements; converting them into
+elapsed years requires evidence about accepted write rates and timestamp
+control.
 
-To help put this into perspective, the probability of a CA collision is
-less likely than a bit error on disk (the non-recoverable Bit Error Rate
-(BER) of a typical ATA disk is \textasciitilde1 for every \(10^{15}\)
-bits read). As mentioned in §1, in addition to using the CA as an object
-handle, Centera uses the CA as an MDC. Therefore, in the event of a bit
-error on disk, Centera will detect this error via a background task that
-periodically checks the validity of a file image on disk against its CA.
-In the event a manipulation is detected, Centera will automatically
-replace the bad file with a good copy, thus insuring data integrity over
-the life of the archive.
-
-In the case where a malicious user wishes to forge two arbitrary files
-which result in an identical \textbf{GM} content address (CA), the user
-needs to mount an online attack against a Centera system. One strategy
-would be to start from a known \textbf{M} collision (as described in
-\cite{ref30}) and attempt to write the colliding file to all
-access nodes simultaneously within the same millisecond. In this way the
-attacker would seek to get some control over the M.T.C.H components of
-the \textbf{GM} content address (cf.~\S\ref{sec:5.4}). Within
-that millisecond, the user would attempt to write to \emph{A} access
-nodes in parallel and hope for a collision in the 70-bit G component.
-Since \emph{A} is typically very small (less than 100), coupled with the
-time it would take to perform the writes, it would take millions of
-years before such an attack is successful.
-
-For the same reasons, forging a second preimage in an attempt to
-overwrite an existing \textbf{GM} file, is infeasible.
+The archived 2005 correspondence reports that a raw-write SDK path can allow
+caller control of G. Therefore server-chosen randomness and exclusively
+online attacks cannot be asserted for every write path. If G is selectable,
+its random-collision factor provides no security against that caller;
+control of the other fields and the system's write checks must be analyzed.
+An address collision alone does not establish overwrite capability.
 
 \subsection{Centera with the M++ naming
 scheme}\label{sec:5.5}\label{centera-with-the-m-naming-scheme-1}
 
-As discussed in \S\ref{sec:5.4}, the \textbf{GM} naming scheme as
-implemented does not allow for single-instance store\footnote{More
-  precisely, GM -- as presently implemented -- does not allow identical
-  objects to have identical names. The \emph{function}, single-instance
-  store, is anticipated to be activated for the GM naming scheme in a
-  later release of CentraStar.}. For those applications that would like
-to retain this ability, but use a stronger naming scheme than
-\textbf{M}, a third naming scheme was created. This 256-bit naming
-scheme, called \textbf{M++}, is constructed by the concatenation of 128
-bits of MD5, 8 bits of formatting and 120 bits of SHA-256. The
-calculation of object names in this naming scheme requires more CPU
-cycles due to the introduction of the extra hash function evaluation.
+The historical M++ construction concatenates 128 MD5 bits, eight formatting
+bits, and 120 SHA-256 output bits. Its deterministic addressing supports
+identical-content naming. The original paper describes GM deduplication as
+a planned release feature; that release history is not established here.
 
-Joux demonstrates that, contrary to Fact 9-27 in \cite{ref2},
-the concatenation (or ``cascading'') of two iterated hash functions is
-only as strong as the strongest of the two hash functions
-\cite{ref1}. The following results apply to the \textbf{M++}
-naming scheme.
+For accidental collisions on distinct contents, assume the joint MD5 and
+truncated SHA-256 output is uniform over $N=2^{248}$ values and independent
+between contents. This is a modeling assumption about the joint output,
+not a consequence of adding bit lengths. At $q=2^{124}$ the birthday
+probability is approximately 39.35\%, and the 50\% threshold is approximately
+$1.17741\cdot2^{124}$. At 10,000 files per second for 1,000 years of 365 days,
+$q=3.1536\cdot10^{14}$ gives approximately $1.10\cdot10^{-46}$, compared
+with $1.46\cdot10^{-10}$ for M under its random-input model.
 
-When writing \textbf{M++} objects to a Centera, collisions become likely
-after 2\textsuperscript{124} objects have been stored on the system
-(cf.~the \textbf{M} naming scheme where this number is
-2\textsuperscript{64}). This can be validated by looking at formula
-\eqref{eq:5.2} and substituting \emph{q} with
-2\textsuperscript{124} and \emph{N} with \(2^{120+128}=2^{248}\) to
-reach a collision probability of \(\approx50\%\).
+For adversarial inputs, Joux's multicollision construction shows that
+concatenated iterated hashes need not achieve the collision strength of an
+ideal hash with their combined output length \cite{ref1}. This does not
+justify a general claim that every truncated concatenation has exactly the
+strength of its strongest component.
 
-After 1,000 years of continuous operation, a hypothetical CAS
-application capable of storing 10,000 files per second on a Centera
-system would have stored \(3.15\cdot10^{14}\) files. This results in a
-collision probability of 10\textsuperscript{-46} for the \textbf{M++}
-naming scheme (cf.~10\textsuperscript{-9} for the \textbf{M} naming
-scheme). This can be validated by looking at formula
-\eqref{eq:5.2} and substituting \emph{q} with
-\(3.15\cdot10^{14}\) and \emph{N} with \(2^{120+128}=2^{248}.\)
+The original illustrative attack builds a $2^{60}$-member MD5 multicollision
+family and searches for a collision in 120 SHA-256 output bits. It presumes
+that suitable equal-length MD5 collision blocks can be chained and that the
+resulting SHA-256 prefixes behave randomly. A naive scan of $2^{60}$
+candidates of 120 message blocks costs about $120\cdot2^{60}$ SHA-256
+compression calls, plus padding, MD5-family construction, and storage/search
+costs. This is a conditional attack estimate, not a lower bound on required
+work or a proof that future improvements cannot help. Its birthday success
+probability at that family size is about 39\%, not certainty.
 
-A malicious user wishing to induce a collision for \textbf{M++} will
-need to calculate \textasciitilde2\textsuperscript{67} SHA-256 hash
-function evaluations. Potential future optimizations of the MD5 attacks
-described in \cite{ref30} have no impact on this result. This
-result is achieved as follows. One can try to create a
-2\textsuperscript{60}-fold multicollision for MD5 using the techniques
-of Wang et al.~\cite{ref30} combined with the ideas of Joux
-\cite{ref1}. This requires about 60 times more work than
-creating a single collision. The length of the resulting file will be at
-least 120 blocks of MD5, i.e.~7,680 bytes. Next, one searches within
-this space of 2\textsuperscript{60} files for a collision for the
-leftmost 120 bits of SHA-256. One expects to find such a collision by
-the birthday paradox. The effort required is
-\(120\cdot2^{60}\approx2^{67}\) evaluations of SHA-256.
-
-In case a malicious user wants to forge a second preimage in an attempt
-to overwrite an existing \textbf{M++} file, we can use the ideas
-outlined in \cite{ref11} to show that an effort of about
-\(2^{119}\) SHA-256 evaluations is required.
+For second preimages, the original $2^{119}$ claim is not established by
+\cite{ref11}. SHA-256 has a 256-bit chaining state even when only 120 output
+bits are retained; substituting 120 for its state width in that attack is
+invalid. Moreover, a second preimage of M++ must match both the MD5 and
+SHA-256 portions. A defensible concrete attack cost for that combined target
+is not derived here. The distinction between a fixed target and any of many
+targets in \S\ref{sec:4.2} also applies.
 
 \subsection{Summary of naming schemes}\label{sec:5.6}\label{summary-of-naming-schemes}
 
@@ -375,26 +303,10 @@ cryptology.
 Table~\ref{tab:2} summarizes the strength of the various naming
 schemes.
 
-The second column estimates the number of files that need to be written
-to a Centera system before collisions become likely.
-
-The third column lists the effort required for an attacker to forge a
-collision, i.e.~to forge two files X and \(X'\) , which result in the
-same content address on a Centera. Note that this is not the same as
-starting with a file X, and creating a second file \(X'\) which has the
-same content address.
-
-The fourth column lists the effort required for an attacker to forge a
-second preimage. For this the attacker starts with a file X and its
-content address, and the intent is to forge a second file \(X'\) which
-gets the same content address on a Centera.
-
-Note that for the \textbf{M} and \textbf{M++} naming schemes, an
-attacker could attempt to create a collision or a second preimage
-offline. However, for the \textbf{GM} naming scheme, all attacks need to
-happen online since the attacker has no control over the 70 bits random
-\textbf{G} part of the content address. This effectively makes attacks
-against \textbf{GM} infeasible, since it would take millions of years to
-execute these attacks.
+The second column gives the approximate 50\% point under the stated
+accidental-content model. The attack columns deliberately distinguish
+conditional estimates from established bounds. GM results depend on the
+write path, randomness, and timestamp/counter behavior; no universal
+``impossible'' classification or time-to-attack claim follows from this paper.
 
 \input{fig/naming-table}
