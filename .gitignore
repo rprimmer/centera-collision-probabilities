@@ -1,6 +1,6 @@
 /build/
 /dist/
-/Attic/
+/_attic/
 /.conversion-baseline/
 .DS_Store
 *.synctex.gz

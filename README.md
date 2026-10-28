@@ -42,16 +42,16 @@ ZIP packaging. Neither Pandoc nor Office applications are build dependencies.
 - [fig/](fig/): one editable TikZ diagram and two editable LaTeX tables.
 - [scripts/package-overleaf.py](scripts/package-overleaf.py): source-only packager.
 - `build/` and `dist/`: generated local outputs, excluded from Git.
-- `Attic/`: all 19 original documents, research references, diagrams, and
+- `_attic/`: all 19 original documents, research references, diagrams, and
   correspondence, preserved byte-for-byte and excluded from Git.
 - `.conversion-baseline/`: local source extraction, original SHA-256 manifest,
   conversion intermediate, and validation records, excluded from Git.
 
 ## Conversion scope
 
-The final, 10-page `Attic/Centera Collision Probs.pdf` is the authority for
+The final, 10-page `_attic/Centera Collision Probs.pdf` is the authority for
 mathematics, numbering, tables, and figure content. The matching
-`Attic/WP - Centera Content Address - v2.21.odt` supplied the prose.
+`_attic/WP - Centera Content Address - v2.21.odt` supplied the prose.
 The Word document and every other original are retained unchanged.
 
 The corrected edition uses the single-column layout of the previous Centera

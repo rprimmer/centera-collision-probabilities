@@ -18,6 +18,6 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error centera-collisions.tex
 ```
 
 The local project uses `make` to generate `build/centera-collisions.pdf` and
-`make overleaf` to regenerate the ZIP. Original documents in `Attic/` remain
+`make overleaf` to regenerate the ZIP. Original documents in `_attic/` remain
 local and are excluded from the ZIP and Git repository. The September 14, 2026 corrected edition revises mathematical and security
 claims; see the repository README for corrections and unresolved assumptions.
